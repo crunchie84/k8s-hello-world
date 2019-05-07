@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: demo3
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: demo3
+    spec:
+      containers:
+      - name: demo3
+        image: eu.gcr.io/delta-n-k8s-kennissessie/demo3:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
