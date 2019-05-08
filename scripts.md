@@ -17,7 +17,10 @@ gcloud container clusters create my-cluster \
   --preemptible \
   --async
 
+# observe the state of the cluster cration (state: PROVISIONING -> RUNNING)
 gcloud container clusters list
+
+# login kubectl with the correct cluster credentials
 gcloud container clusters get-credentials my-cluster --zone europe-west1-b
 ```
 
@@ -29,9 +32,13 @@ docker push eu.gcr.io/devops-with-k8s-hello-world/demo3:v1
 
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
-
-# achterhalen remote ip
+# note; the external ip reservation takes time (1-2 minutes)
+# retrieve external ip of service
 kubectl get service
+curl <remote_ip>
+# observe that invoking curl a few times round-robin-ishes us over the pods
+curl <remote_ip>
+curl <remote_ip>
 curl <remote_ip>
 ```
 
@@ -45,15 +52,24 @@ docker push eu.gcr.io/devops-with-k8s-hello-world/demo4:v1
 
 kubectl apply -f deployment.yaml
 
+# demo that our application is able to handle all requests 250qps with 100% success
 # load test + perceive what happens with pods
-fortio load -c 8 -qps 250 -t 40s http://104.199.45.230/
+fortio load -c 8 -qps 250 -t 20s http://104.199.45.230/
+
+# open second terminal so we can observe what happens with the pods during the deployment
 watch -n 1 kubectl get pods
 
-# change something in the deployment
+# invoke the load test for a bit longer while after 10 seconds appyling the deployment in the first terminal
+fortio load -c 8 -qps 250 -t 40s http://104.199.45.230/
+
+# create third terminal in which we will apply the new deployment
+# change something (add label?) in the deployment and re-apply the yaml to trigger rolling update
 kubectl apply -f deployment.yaml
+
+# observe 100% 200 OK result during rolling deployment
 ```
 
-Now dive into the deployments, replicasets and how to revert
+After rolling deploy look at the primitives in Kubernetes. Dive into the deployments, replicasets and how to revert the deploy
 
 ```
 kubectl rollout status deployment demo4

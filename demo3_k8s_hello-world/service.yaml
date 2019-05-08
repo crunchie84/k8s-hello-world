@@ -6,6 +6,9 @@ metadata:
     app: my-demo-service
 spec:
   type: LoadBalancer
+  # the label selector is on purpose wrong and points to `demo1` which does not exist after creating the demo3 deployment
+  # this to demonstrate that we can manipulate this on the fly by editing this service in the cluster `kubectl edit service my-demo-service'`
+  # and updating the selector to reflect `demo3` and observe that the service now correctly exposes the pods of our application
   selector:
     app: demo1
   ports:
